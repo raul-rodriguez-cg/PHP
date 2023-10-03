@@ -1,5 +1,6 @@
 <?php
 require_once 'Pedido.php';
+require_once 'ListaPedidos.php';
 
 $pedidos = array();
 $indice_pedidos = array();
@@ -19,6 +20,9 @@ function menu(&$pedidos, &$indice_pedidos, &$id_pedido): void{
                 listar_pedidos_pendientes($pedidos);
                 break;
             case 3:
+                if (hay_pendiente($pedidos)){
+                    break;
+                }
                 registrar_pedido($id_pedido, $indice_pedidos, $pedidos);
                 break;
 
@@ -42,6 +46,16 @@ function comp_pedidos(array &$pedidos):bool{
     }else{
         return true;
     }
+}
+
+function hay_pendiente(array &$pedidos): bool{
+    foreach ($pedidos as $pedido){
+        if($pedido->get_estado() != EstadosPedido::ENTREGADO){
+            echo "Ya hay un pedido en curso." . PHP_EOL;
+            return true;
+        }
+    }
+    return false;
 }
 
 function listar_menu(): int{
