@@ -42,7 +42,7 @@ class Pedido
 
     function to_string(): String{
         return
-            '****'.PHP_EOL .
+            PHP_EOL . '****'. PHP_EOL .
             'Pedido: ' . $this->id . PHP_EOL .
             '   Estado: ' . $this->estado . PHP_EOL .
             '   Direccion de recogida: ' . $this->dir_recogida . PHP_EOL .

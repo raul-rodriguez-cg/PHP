@@ -1,12 +1,11 @@
 <?php
 require_once 'Pedido.php';
 require_once 'ListaPedidos.php';
-
-$pedidos = array();
-$indice_pedidos = array();
+$lista_pedidos = new ListaPedidos();
 $id_pedido = 1;
-menu($pedidos, $indice_pedidos, $id_pedido);
-function menu(&$pedidos, &$indice_pedidos, &$id_pedido): void{
+menu($lista_pedidos, $indice_pedidos, $id_pedido);
+
+function menu(&$lista_pedidos, &$indice_pedidos, &$id_pedido): void{
     //EN vez de global, pasarlo por parámetro.
 
     while(true){
@@ -14,23 +13,23 @@ function menu(&$pedidos, &$indice_pedidos, &$id_pedido): void{
         //Todos estos if se pueden ahorrar, es copia-pega
         switch ($caso){
             case 1:
-                listar_pedidos($pedidos);
+                listar_pedidos($lista_pedidos->get_lista_pedidos());
                 break;
             case 2:
-                listar_pedidos_pendientes($pedidos);
+                listar_pedidos_pendientes($lista_pedidos->get_lista_pedidos());
                 break;
             case 3:
-                if (hay_pendiente($pedidos)){
+                if (hay_pendiente($lista_pedidos->get_lista_pedidos())){
                     break;
                 }
-                registrar_pedido($id_pedido, $indice_pedidos, $pedidos);
+                registrar_pedido($lista_pedidos, $id_pedido);
                 break;
 
             case 4:
-                recoger_pedido($indice_pedidos, $pedidos);
+                recoger_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos());
                 break;
             case 5:
-                entregar_pedido($indice_pedidos, $pedidos);
+                entregar_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos());
                 break;
             case 6:
                 echo "Hasta la vista!".PHP_EOL;
@@ -96,15 +95,19 @@ function listar_pedidos_pendientes(&$pedidos){
 
 }
 
-function registrar_pedido(&$id_pedido, &$indice_pedidos, &$pedidos){
+function registrar_pedido(&$lista_pedidos,&$id_pedido){
 
     echo "Registrando pedido: " . $id_pedido ." ...\n";
     $dir_rec = readline("   Direccion de entrega: ");
     $dir_ent = readline("   Direccion de recogida: ");
 
     $pedido = new Pedido($id_pedido, $dir_rec, $dir_ent);
-    array_push($pedidos, $pedido);
-    array_push($indice_pedidos, $id_pedido);
+
+    $lista_pedidos->set_lista_pedidos($pedido);
+    $lista_pedidos->set_indice_pedidos($id_pedido);
+
+
+
     echo "Pedido " . $id_pedido . " registrado.".PHP_EOL.PHP_EOL;
     $id_pedido++;
 
