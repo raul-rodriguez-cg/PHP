@@ -3,51 +3,45 @@ require_once 'Pedido.php';
 
 $pedidos = array();
 $indice_pedidos = array();
-function menu(): int{
-    global $pedidos;
-    global $indice_pedidos;
+$id_pedido = 1;
+menu($pedidos, $indice_pedidos, $id_pedido);
+function menu(&$pedidos, &$indice_pedidos, &$id_pedido): void{
+    //EN vez de global, pasarlo por parámetro.
 
     while(true){
         $caso = listar_menu();
+        //Todos estos if se pueden ahorrar, es copia-pega
         switch ($caso){
             case 1:
-                if(empty($pedidos)){
-                    echo "Sin pedidos!".PHP_EOL;
-                }else{
-                    listar_pedidos();
-                }
+                listar_pedidos($pedidos);
                 break;
             case 2:
-                if(empty($pedidos)){
-                    echo "Sin pedidos!".PHP_EOL;
-                }else{
-                    listar_pedidos_pendientes();
-                }
+                listar_pedidos_pendientes($pedidos);
                 break;
             case 3:
-                registrar_pedido();
+                registrar_pedido($id_pedido, $indice_pedidos, $pedidos);
                 break;
 
             case 4:
-                if(empty($pedidos)){
-                    echo "Sin pedidos!".PHP_EOL;
-                }else{
-                    recoger_pedido();
-                }
+                recoger_pedido($indice_pedidos, $pedidos);
                 break;
             case 5:
-                if(empty($pedidos)){
-                    echo "Sin pedidos!".PHP_EOL;
-                }else{
-                    entregar_pedido();
-                }
+                entregar_pedido($indice_pedidos, $pedidos);
                 break;
             case 6:
                 echo "Hasta la vista!".PHP_EOL;
                 break 2;
         }
     }
-    return 1;
+
+}
+function comp_pedidos(array &$pedidos):bool{
+    if(empty($pedidos)){
+        echo "Sin pedidos!".PHP_EOL;
+        return false;
+    }else{
+        return true;
+    }
 }
 
 function listar_menu(): int{
@@ -62,8 +56,11 @@ function listar_menu(): int{
     return readline("Escoja una opcion: ");
 }
 
-function listar_pedidos(){
-    global $pedidos;
+function listar_pedidos(&$pedidos){
+
+    if(!comp_pedidos($pedidos)){
+        return;
+    }
 
     foreach ($pedidos as $pedido){
         echo $pedido->to_string();
@@ -71,8 +68,11 @@ function listar_pedidos(){
 
 }
 
-function listar_pedidos_pendientes(){
-    global $pedidos;
+function listar_pedidos_pendientes(&$pedidos){
+
+    if(!comp_pedidos($pedidos)){
+        return;
+    }
 
     foreach ($pedidos as $pedido){
         if($pedido->get_estado() == "Pendiente"){
@@ -82,11 +82,8 @@ function listar_pedidos_pendientes(){
 
 }
 
-$id_pedido = 1;
-function registrar_pedido(){
-    global $id_pedido;
-    global $indice_pedidos;
-    global $pedidos;
+function registrar_pedido(&$id_pedido, &$indice_pedidos, &$pedidos){
+
     echo "Registrando pedido: " . $id_pedido ." ...\n";
     $dir_rec = readline("   Direccion de entrega: ");
     $dir_ent = readline("   Direccion de recogida: ");
@@ -99,9 +96,10 @@ function registrar_pedido(){
 
 }
 
-function recoger_pedido(){
-    global $indice_pedidos;
-    global $pedidos;
+function recoger_pedido(&$indice_pedidos, &$pedidos){
+    if(!comp_pedidos($pedidos)){
+        return;
+    }
 
     $num_pedido = readline("Numero de pedido: ");
     if(!in_array($num_pedido, $indice_pedidos)) {
@@ -123,10 +121,11 @@ function recoger_pedido(){
 
 }
 
-function entregar_pedido()
+function entregar_pedido(&$indice_pedidos, &$pedidos)
 {
-    global $indice_pedidos;
-    global $pedidos;
+    if(!comp_pedidos($pedidos)){
+        return;
+    }
 
     $num_pedido = readline("Numero de pedido: ");
     if (!in_array($num_pedido, $indice_pedidos)) {
@@ -162,4 +161,4 @@ function calcular_tiempo($t_inicio, $t_fin): String{
 
 }
 
-menu();
+
