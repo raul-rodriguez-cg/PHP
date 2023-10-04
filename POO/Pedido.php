@@ -18,6 +18,7 @@ class Pedido
     private $h_entrega;
     private $dir_entrega;
     private $t_entrega;
+    public $distancia;
 
     /**
      * @param $id
@@ -37,6 +38,7 @@ class Pedido
         $this->h_entrega = "-";
         $this->dir_entrega = $dir_entrega;
         $this->t_entrega = "-";
+        $this->set_distancia($dir_entrega, $dir_recogida);
     }
 
 
@@ -49,7 +51,8 @@ class Pedido
             '   Hora de recogida: ' . $this->h_recogida  . PHP_EOL .
             '   Direccion de entrega: ' . $this->dir_entrega . PHP_EOL.
             '   Hora de entrega: ' . $this->h_entrega  . PHP_EOL .
-            '   Tiempo de entrega: ' . $this->t_entrega  . PHP_EOL .PHP_EOL ;
+            '   Tiempo de entrega: ' . $this->t_entrega  . PHP_EOL .
+            '   Distancia: ' . $this->distancia . PHP_EOL . PHP_EOL;
     }
 
     public function get_estado(): String
@@ -86,6 +89,53 @@ class Pedido
 
     public function set_t_entrega(String $tiempo): void{
         $this->t_entrega = $tiempo;
+    }
+
+    public function calcular_distancia(array $dist1,array $dist2):String{
+        if(empty($dist2) || empty($dist1)){
+            return "No disponible";
+        }
+
+        $lat1 = $dist1[0];
+        $lon1 = $dist1[1];
+        $lat2 = $dist2[0];
+        $lon2 = $dist2[1];
+
+        $theta = $lon1 - $lon2;
+        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
+        return round(($miles * 1.609344),2) . " Km". PHP_EOL;
+    }
+
+    public function set_distancia(String $dist1,String $dist2): void{
+        $this->distancia = self::calcular_distancia(
+            $this->obtener_coordenada($dist1),
+            $this->obtener_coordenada($dist2));
+    }
+
+    public function obtener_coordenada(String $direccion): array{
+        $queryString = http_build_query([
+            'access_key' => '7bbd5e1a511c2d307f8acb8cf17e46be',
+            'query' => $direccion . ", LO",
+            'region' => 'España',
+            'output' => 'json',
+            'limit' => 1,
+        ]);
+
+        $ch = curl_init(sprintf('%s?%s', 'http://api.positionstack.com/v1/forward', $queryString));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $json = curl_exec($ch);
+
+        curl_close($ch);
+
+        $apiResult = json_decode($json, true);
+        return array(
+            $apiResult["data"][0]["latitude"],
+            $apiResult["data"][0]["longitude"]
+        );
     }
 
 }

@@ -40,7 +40,7 @@ function menu($lista_pedidos, &$id_pedido): void{
 }
 function comp_pedidos(array $pedidos):bool{
     if(empty($pedidos)){
-        echo "Sin pedidos!".PHP_EOL;
+        echo "\tSin pedidos!".PHP_EOL;
         return false;
     }else{
         return true;
@@ -50,7 +50,7 @@ function comp_pedidos(array $pedidos):bool{
 function hay_pendiente(array $pedidos): bool{
     foreach ($pedidos as $pedido){
         if($pedido->get_estado() != EstadosPedido::ENTREGADO){
-            echo "Ya hay un pedido en curso." . PHP_EOL;
+            echo "\tYa hay un pedido en curso." . PHP_EOL;
             return true;
         }
     }
@@ -92,7 +92,6 @@ function listar_pedidos_pendientes($pedidos): void{
             echo $pedido->to_string();
         }
     }
-
 }
 
 function registrar_pedido($lista_pedidos,&$id_pedido): void{
@@ -120,12 +119,12 @@ function recoger_pedido($indice_pedidos, $pedidos): void{
 
     $num_pedido = readline("Numero de pedido: ");
     if(!in_array($num_pedido, $indice_pedidos)) {
-        echo "Pedido no valido." . PHP_EOL;
+        echo "\nPedido no valido." . PHP_EOL;
         return;
     }
     foreach ($pedidos as $pedido){
         if($pedido->get_estado() != "Pendiente"){
-            echo "Pedido no pendiente." .PHP_EOL;
+            echo "\nPedido no pendiente." .PHP_EOL;
             return;
         }
         if($pedido->id == $num_pedido ){
@@ -146,13 +145,13 @@ function entregar_pedido($indice_pedidos, $pedidos): void
 
     $num_pedido = readline("Numero de pedido: ");
     if (!in_array($num_pedido, $indice_pedidos)) {
-        echo "Pedido no valido." . PHP_EOL;
+        echo "\tPedido no valido." . PHP_EOL;
         return;
 
     }
     foreach ($pedidos as $pedido) {
         if($pedido->get_estado() != "Recogido"){
-            echo "Pedido no recogido.";
+            echo "\tPedido no recogido." . PHP_EOL;
             return;
 
         }
