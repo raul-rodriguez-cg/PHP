@@ -3,9 +3,9 @@ require_once 'Pedido.php';
 require_once 'ListaPedidos.php';
 $lista_pedidos = new ListaPedidos();
 $id_pedido = 1;
-menu($lista_pedidos, $indice_pedidos, $id_pedido);
+menu($lista_pedidos, $id_pedido);
 
-function menu(&$lista_pedidos, &$indice_pedidos, &$id_pedido): void{
+function menu($lista_pedidos, &$id_pedido): void{
     //EN vez de global, pasarlo por parámetro.
 
     while(true){
@@ -38,7 +38,7 @@ function menu(&$lista_pedidos, &$indice_pedidos, &$id_pedido): void{
     }
 
 }
-function comp_pedidos(array &$pedidos):bool{
+function comp_pedidos(array $pedidos):bool{
     if(empty($pedidos)){
         echo "Sin pedidos!".PHP_EOL;
         return false;
@@ -47,7 +47,7 @@ function comp_pedidos(array &$pedidos):bool{
     }
 }
 
-function hay_pendiente(array &$pedidos): bool{
+function hay_pendiente(array $pedidos): bool{
     foreach ($pedidos as $pedido){
         if($pedido->get_estado() != EstadosPedido::ENTREGADO){
             echo "Ya hay un pedido en curso." . PHP_EOL;
@@ -69,7 +69,7 @@ function listar_menu(): int{
     return readline("Escoja una opcion: ");
 }
 
-function listar_pedidos(&$pedidos){
+function listar_pedidos($pedidos): void{
 
     if(!comp_pedidos($pedidos)){
         return;
@@ -81,7 +81,7 @@ function listar_pedidos(&$pedidos){
 
 }
 
-function listar_pedidos_pendientes(&$pedidos){
+function listar_pedidos_pendientes($pedidos): void{
 
     if(!comp_pedidos($pedidos)){
         return;
@@ -95,7 +95,7 @@ function listar_pedidos_pendientes(&$pedidos){
 
 }
 
-function registrar_pedido(&$lista_pedidos,&$id_pedido){
+function registrar_pedido($lista_pedidos,&$id_pedido): void{
 
     echo "Registrando pedido: " . $id_pedido ." ...\n";
     $dir_rec = readline("   Direccion de entrega: ");
@@ -113,7 +113,7 @@ function registrar_pedido(&$lista_pedidos,&$id_pedido){
 
 }
 
-function recoger_pedido(&$indice_pedidos, &$pedidos){
+function recoger_pedido($indice_pedidos, $pedidos): void{
     if(!comp_pedidos($pedidos)){
         return;
     }
@@ -138,7 +138,7 @@ function recoger_pedido(&$indice_pedidos, &$pedidos){
 
 }
 
-function entregar_pedido(&$indice_pedidos, &$pedidos)
+function entregar_pedido($indice_pedidos, $pedidos): void
 {
     if(!comp_pedidos($pedidos)){
         return;
@@ -171,10 +171,8 @@ function entregar_pedido(&$indice_pedidos, &$pedidos)
 }
 function calcular_tiempo($t_inicio, $t_fin): String{
     $nuevaHora = strtotime($t_fin) - strtotime($t_inicio);
-    $cadena = date("i", $nuevaHora) . " minutos " .
+    return date("i", $nuevaHora) . " minutos " .
         date("s",$nuevaHora) . " segundos.";
-
-    return $cadena;
 
 }
 
