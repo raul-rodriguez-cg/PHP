@@ -32,6 +32,10 @@ function menu($lista_pedidos, &$id_pedido): void{
                 entregar_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos());
                 break;
             case 6:
+                cambiar_distancia($lista_pedidos->get_lista_pedidos(), $lista_pedidos->get_indice_pedidos());
+                break;
+
+            case 7:
                 echo "Hasta la vista!".PHP_EOL;
                 break 2;
         }
@@ -45,6 +49,46 @@ function comp_pedidos(array $pedidos):bool{
     }else{
         return true;
     }
+}
+function comp_distancia($pedido, $num_pedido): bool{
+
+
+    if($pedido->get_distancia() == "No disponible" && $pedido->get_id() == $num_pedido){
+        return false;
+    }
+
+    return true;
+}
+
+function cambiar_distancia($pedidos, $indice_pedidos): void{
+
+    if(!comp_pedidos($pedidos)){
+        return;
+    }
+
+    $num_pedido = readline("Numero de pedido: ");
+    if(!in_array($num_pedido, $indice_pedidos)) {
+        echo "\nPedido no valido." . PHP_EOL;
+        return;
+    }
+    $pedido = $pedidos[$num_pedido - 1];
+    if(!comp_distancia($pedido, $num_pedido)){
+        $n_entrega = readline("Nueva Direccion de entrega: ");
+        $n_recogida= readline("Nueva Direccion de recogida: ");
+
+        $pedido->set_dir_recogida($n_recogida);
+        $pedido->set_dir_entrega($n_entrega);
+        $pedido->set_distancia($n_recogida, $n_entrega);
+        //Podría comprobarse recursivamente
+        if(!comp_distancia($pedido, $num_pedido)){
+            echo "\tDistancia cambiada!".PHP_EOL;
+        }else{
+            echo "\tNo se pudo obtener la distancia.". PHP_EOL;
+        }
+    }else{
+        echo "La distancia ya es correcta" . PHP_EOL;
+    }
+
 }
 
 function hay_pendiente(array $pedidos): bool{
@@ -64,7 +108,8 @@ function listar_menu(): int{
     echo "3.Registrar nuevo pedido.". PHP_EOL;
     echo "4.Recoger pedido.". PHP_EOL;
     echo "5.Entregar pedido.". PHP_EOL;
-    echo "6.Salir.". PHP_EOL;
+    echo "6.Calcular distancia". PHP_EOL;
+    echo "7.Salir.". PHP_EOL;
 
     return readline("Escoja una opcion: ");
 }

@@ -55,10 +55,35 @@ class Pedido
             '   Distancia: ' . $this->distancia . PHP_EOL . PHP_EOL;
     }
 
+    public function get_id():int{
+        return $this->id;
+    }
     public function get_estado(): String
     {
         return $this->estado;
     }
+
+    public function get_dir_recogida(): string
+    {
+        return $this->dir_recogida;
+    }
+
+    public function set_dir_recogida(string $dir_recogida): void
+    {
+        $this->dir_recogida = $dir_recogida;
+    }
+
+    public function get_dir_entrega(): string
+    {
+        return $this->dir_entrega;
+    }
+
+    public function set_dir_entrega(string $dir_entrega): void
+    {
+        $this->dir_entrega = $dir_entrega;
+    }
+
+
 
     public function get_h_recogida(): String
     {
@@ -113,6 +138,9 @@ class Pedido
         $this->distancia = self::calcular_distancia(
             $this->obtener_coordenada($dist1),
             $this->obtener_coordenada($dist2));
+    }
+    public function get_distancia(){
+        return $this->distancia;
     }
 
     public function obtener_coordenada(String $direccion): array{
