@@ -19,6 +19,7 @@ class Pedido
     private $dir_entrega;
     private $t_entrega;
     public $distancia;
+    private $rider_asignado;
 
     /**
      * @param $id
@@ -39,6 +40,7 @@ class Pedido
         $this->dir_entrega = $dir_entrega;
         $this->t_entrega = "-";
         $this->set_distancia($dir_entrega, $dir_recogida);
+        $this->rider_asignado = "-";
     }
 
 
@@ -52,7 +54,8 @@ class Pedido
             '   Direccion de entrega: ' . $this->dir_entrega . PHP_EOL.
             '   Hora de entrega: ' . $this->h_entrega  . PHP_EOL .
             '   Tiempo de entrega: ' . $this->t_entrega  . PHP_EOL .
-            '   Distancia: ' . $this->distancia . PHP_EOL . PHP_EOL;
+            '   Distancia: ' . $this->distancia . PHP_EOL .
+            '   Rider asignado: ' . $this->rider_asignado .PHP_EOL;
     }
 
     public function get_id():int{
@@ -114,6 +117,16 @@ class Pedido
 
     public function set_t_entrega(String $tiempo): void{
         $this->t_entrega = $tiempo;
+    }
+
+    public function get_rider_asignado(): string
+    {
+        return $this->rider_asignado;
+    }
+
+    public function set_rider_asignado(string $rider_asignado): void
+    {
+        $this->rider_asignado = $rider_asignado;
     }
 
     public function calcular_distancia(array $dist1,array $dist2):String{

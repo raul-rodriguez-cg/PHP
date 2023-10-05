@@ -30,10 +30,10 @@ function menu($lista_pedidos, &$id_pedido, &$id_rider, &$lista_riders): void{
                 registrar_pedido($lista_pedidos, $id_pedido);
                 break;
             case 4:
-                recoger_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos());
+                recoger_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos(), $lista_riders);
                 break;
             case 5:
-                entregar_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos());
+                entregar_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos(), $lista_riders);
                 break;
             case 6:
                 cambiar_distancia($lista_pedidos->get_lista_pedidos(), $lista_pedidos->get_indice_pedidos());
@@ -44,7 +44,7 @@ function menu($lista_pedidos, &$id_pedido, &$id_rider, &$lista_riders): void{
                 //Dar Rider de alta
                 break;
             case 8:
-                listar_riders($lista_riders);
+                asignar_riders($lista_riders, $lista_pedidos->get_lista_pedidos(), $lista_pedidos->get_indice_pedidos());
                 break;
             case 9:
                 echo "Hasta la vista!".PHP_EOL;
@@ -70,15 +70,11 @@ function comp_riders(array $lista_riders):bool{
     }
 }
 function comp_distancia($pedido, $num_pedido): bool{
-
-
     if($pedido->get_distancia() == "No disponible" && $pedido->get_id() == $num_pedido){
         return false;
     }
-
     return true;
 }
-
 function cambiar_distancia($pedidos, $indice_pedidos): void{
 
     if(!comp_pedidos($pedidos)){
@@ -107,7 +103,6 @@ function cambiar_distancia($pedidos, $indice_pedidos): void{
     }else{
         echo "La distancia ya es correcta" . PHP_EOL;
     }
-
 }
 
 function hay_pendiente(array $pedidos): bool{
@@ -129,7 +124,7 @@ function listar_menu(): int{
     echo "5.Entregar pedido.". PHP_EOL;
     echo "6.Calcular distancia". PHP_EOL;
     echo "7.Dar Rider de alta". PHP_EOL;
-    echo "8.Listar Riders". PHP_EOL;
+    echo "8.Asignar rider a pedido". PHP_EOL;
     echo "7.Salir.". PHP_EOL;
 
     return readline("Escoja una opcion: ");
@@ -147,19 +142,19 @@ function listar_pedidos($pedidos): void{
 
 }
 
-function listar_pedidos_pendientes($pedidos): void{
+function listar_pedidos_pendientes($pedidos): void
+{
 
-    if(!comp_pedidos($pedidos)){
+    if (!comp_pedidos($pedidos)) {
         return;
     }
 
-    foreach ($pedidos as $pedido){
-        if($pedido->get_estado() == "Pendiente"){
+    foreach ($pedidos as $pedido) {
+        if ($pedido->get_estado() == "Pendiente") {
             echo $pedido->to_string();
         }
     }
 }
-
 function registrar_pedido($lista_pedidos,&$id_pedido): void{
 
     echo "Registrando pedido: " . $id_pedido ." ...\n";
@@ -178,7 +173,7 @@ function registrar_pedido($lista_pedidos,&$id_pedido): void{
 
 }
 
-function recoger_pedido($indice_pedidos, $pedidos): void{
+function recoger_pedido($indice_pedidos, $pedidos, $lista_riders): void{
     if(!comp_pedidos($pedidos)){
         return;
     }
@@ -193,9 +188,19 @@ function recoger_pedido($indice_pedidos, $pedidos): void{
             echo "\nPedido no pendiente." .PHP_EOL;
             return;
         }
+        if($pedido->get_rider_asignado() == "-"){
+            echo "  Pedido no asignado a ningun rider." .PHP_EOL;
+            return;
+        }
+
         if($pedido->id == $num_pedido ){
             $pedido->set_recoger_pedido();
             $pedido->set_h_recogida(date("d/m/Y H:i:s"));
+            foreach($lista_riders as $rider){
+                if($rider->get_nombre() == $pedido->get_rider_asignado()){
+                    $rider->set_estado(EstadoRider::OCUPADO);
+                }
+            }
             echo $pedido->to_string();
             echo "Pedido " . $num_pedido . " recogido." . PHP_EOL;
         }
@@ -203,7 +208,7 @@ function recoger_pedido($indice_pedidos, $pedidos): void{
 
 }
 
-function entregar_pedido($indice_pedidos, $pedidos): void
+function entregar_pedido($indice_pedidos, $pedidos, $lista_riders): void
 {
     if(!comp_pedidos($pedidos)){
         return;
@@ -216,11 +221,15 @@ function entregar_pedido($indice_pedidos, $pedidos): void
 
     }
     foreach ($pedidos as $pedido) {
-        if($pedido->get_estado() != "Recogido"){
+        if($pedido->get_estado() == "Pendiente"){
             echo "\tPedido no recogido." . PHP_EOL;
             return;
-
         }
+        if($pedido->get_estado() == "Entregado"){
+            echo "\tPedido ya entregado." . PHP_EOL;
+            return;
+        }
+
         if ($pedido->id == $num_pedido) {
             $pedido->set_entregar_pedido();
             $pedido->set_h_entrega(date("d/m/Y H:i:s"));
@@ -230,7 +239,11 @@ function entregar_pedido($indice_pedidos, $pedidos): void
             );
             echo $pedido->to_string();
             echo "Pedido " . $num_pedido . " entregado." . PHP_EOL;
-
+        }
+        foreach ($lista_riders as $rider){
+            if($rider->get_nombre() == $pedido->get_rider_asignado()){
+                $rider->set_estado(EstadoRider::LIBRE);
+            }
         }
     }
 }
@@ -248,14 +261,74 @@ function dar_alta_rider(&$id_rider, &$lista_riders): void{
     $id_rider++;
 }
 
-function listar_riders($lista_riders){
-    if(!comp_riders($lista_riders)){
+function asignar_riders($lista_riders, $lista_pedidos, $indice_pedidos)
+{
+    if (!comp_riders($lista_riders)) {
         return;
     }
 
-    foreach ($lista_riders as $rider){
-        echo "\t". $rider->to_string() .PHP_EOL;
+    listar_riders($lista_riders);
+    if (!comp_pedidos($lista_pedidos)) {
+        return;
+    }
+
+    $id_rider = readline("Selecciona id de rider: ");
+    foreach ($lista_riders as $rider) {
+        if ($rider->get_id() == $id_rider && $rider->get_estado() == EstadoRider::OCUPADO) {
+            echo "  Rider no disponible" . PHP_EOL;
+            return;
+        }
+    }
+
+    $num_pedido = readline("Selecciona id de pedido: ");
+        if (!in_array($num_pedido, $indice_pedidos)) {
+            echo "\n    Pedido no valido." . PHP_EOL;
+            return;
+        }
+
+    $pedido_asignado = $lista_pedidos[$num_pedido - 1];
+    if($pedido_asignado->get_estado() != EstadosPedido::PENDIENTE){
+        echo "\n    Pedido no valido." . PHP_EOL;
+        return;
+    }
+    if($pedido_asignado->get_rider_asignado() != "-"){
+        echo "    El pedido ya ha sido asignado." . PHP_EOL;
+        return;
+    }
+
+    foreach ($lista_riders as $rider) {
+        if ($rider->get_id() == $id_rider && $rider->get_estado() == EstadoRider::LIBRE) {
+            echo "  Rider asignado" . PHP_EOL;
+            //$rider->set_estado(EstadoRider::OCUPADO);
+
+        } else {
+            echo "  Rider no válido" . PHP_EOL;
+            return;
+        }
+    }
+    $rider_asignado = $lista_riders[$id_rider - 1];
+
+    $pedido_asignado->set_rider_asignado($rider_asignado->get_nombre());
+    foreach($lista_pedidos as $pedido){
+        if($pedido->id == $num_pedido ){
+            $pedido->set_rider_asignado($rider_asignado->get_nombre());
+            echo $pedido->to_string();
+            //echo "Pedido " . $num_pedido . " asignado a ". $rider_asignado->get_nombre() . PHP_EOL;
+        }
+
+    }
+
+}
+function listar_riders($lista_riders)
+{
+    foreach ($lista_riders as $rider) {
+        echo "\t" . $rider->to_string() . PHP_EOL;
     }
 }
+
+
+
+
+
 
 

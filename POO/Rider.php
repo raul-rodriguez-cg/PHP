@@ -23,7 +23,7 @@ class Rider
         return $this->estado;
     }
 
-    public function set_estado(EstadoRider $estado): void
+    public function set_estado(String $estado): void
     {
         $this->estado = $estado;
     }
