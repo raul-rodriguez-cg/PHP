@@ -1,11 +1,16 @@
 <?php
 require_once 'Pedido.php';
 require_once 'ListaPedidos.php';
+require_once 'Rider.php';
+
 $lista_pedidos = new ListaPedidos();
 $id_pedido = 1;
-menu($lista_pedidos, $id_pedido);
+$id_rider = 1;
+$lista_riders = array();
 
-function menu($lista_pedidos, &$id_pedido): void{
+menu($lista_pedidos, $id_pedido, $id_rider, $lista_riders );
+
+function menu($lista_pedidos, &$id_pedido, &$id_rider, &$lista_riders): void{
     //EN vez de global, pasarlo por parámetro.
 
     while(true){
@@ -24,7 +29,6 @@ function menu($lista_pedidos, &$id_pedido): void{
                 }
                 registrar_pedido($lista_pedidos, $id_pedido);
                 break;
-
             case 4:
                 recoger_pedido($lista_pedidos->get_indice_pedidos(), $lista_pedidos->get_lista_pedidos());
                 break;
@@ -36,6 +40,13 @@ function menu($lista_pedidos, &$id_pedido): void{
                 break;
 
             case 7:
+                dar_alta_rider($id_rider, $lista_riders);
+                //Dar Rider de alta
+                break;
+            case 8:
+                listar_riders($lista_riders);
+                break;
+            case 9:
                 echo "Hasta la vista!".PHP_EOL;
                 break 2;
         }
@@ -45,6 +56,14 @@ function menu($lista_pedidos, &$id_pedido): void{
 function comp_pedidos(array $pedidos):bool{
     if(empty($pedidos)){
         echo "\tSin pedidos!".PHP_EOL;
+        return false;
+    }else{
+        return true;
+    }
+}
+function comp_riders(array $lista_riders):bool{
+    if(empty($lista_riders)){
+        echo "\tSin riders!".PHP_EOL;
         return false;
     }else{
         return true;
@@ -109,6 +128,8 @@ function listar_menu(): int{
     echo "4.Recoger pedido.". PHP_EOL;
     echo "5.Entregar pedido.". PHP_EOL;
     echo "6.Calcular distancia". PHP_EOL;
+    echo "7.Dar Rider de alta". PHP_EOL;
+    echo "8.Listar Riders". PHP_EOL;
     echo "7.Salir.". PHP_EOL;
 
     return readline("Escoja una opcion: ");
@@ -217,7 +238,24 @@ function calcular_tiempo($t_inicio, $t_fin): String{
     $nuevaHora = strtotime($t_fin) - strtotime($t_inicio);
     return date("i", $nuevaHora) . " minutos " .
         date("s",$nuevaHora) . " segundos.";
+}
 
+function dar_alta_rider(&$id_rider, &$lista_riders): void{
+    $nombre_rider = readline("  Nombre del rider: ");
+    $rider = new Rider($id_rider, $nombre_rider);
+    array_push($lista_riders, $rider);
+    echo "Rider " . $rider->get_nombre() . " dado de alta." . PHP_EOL . PHP_EOL;
+    $id_rider++;
+}
+
+function listar_riders($lista_riders){
+    if(!comp_riders($lista_riders)){
+        return;
+    }
+
+    foreach ($lista_riders as $rider){
+        echo "\t". $rider->to_string() .PHP_EOL;
+    }
 }
 
 
